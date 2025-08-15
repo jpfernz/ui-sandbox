@@ -1,0 +1,32 @@
+mat-dialog-content {
+  padding: 24px;
+  min-width: 320px;
+}
+
+h3[mat-dialog-title] {
+  margin: 0 0 24px 0;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  margin-top: 24px;
+  padding: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+
+  button {
+    min-width: 80px;
+  }
+}

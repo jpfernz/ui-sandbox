@@ -1,25 +1,44 @@
-<h1>Time Box</h1>
+<div class="time-box-container">
+  <h1>Time Box</h1>
 
-<button mat-flat-button data-testid="add-time-block-button">
-  Add Time Block
-</button>
-
-<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
-  @for(item of mockTimeBlocks; track item) {
-  <div
-    class="example-box"
-    cdkDrag
-    [attr.data-testid]="'time-block-' + item.position"
-  >
-    <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
-    <div [attr.data-testid]="'description-' + item.position">
-      {{ item.description }}
-    </div>
-    <div [attr.data-testid]="'time-info-' + item.position">
-      {{ item.startTime ? (item.startTime | date:'HH:mm':'GMT') : '--:--' }} -
-      {{ item.endTime ? (item.endTime | date:'HH:mm':'GMT') : '--:--' }} ({{
-      item.duration }}m)
-    </div>
+  <div class="start-time-input">
+    <mat-form-field appearance="outline">
+      <mat-label>Start Time (GMT)</mat-label>
+      <input
+        matInput
+        type="time"
+        [(ngModel)]="startTimeInput"
+        (ngModelChange)="onStartTimeChange($event)"
+        data-testid="start-time-input"
+      />
+    </mat-form-field>
   </div>
-  }
+
+  <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    @for(item of mockTimeBlocks; track item) {
+    <div
+      class="example-box"
+      cdkDrag
+      [attr.data-testid]="'time-block-' + item.position"
+    >
+      <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
+      <div [attr.data-testid]="'description-' + item.position">
+        {{ item.description }}
+      </div>
+      <div [attr.data-testid]="'time-info-' + item.position">
+        {{ item.startTime ? (item.startTime | date:'HH:mm':'GMT') : '--:--' }} -
+        {{ item.endTime ? (item.endTime | date:'HH:mm':'GMT') : '--:--' }} ({{
+        item.duration }}m)
+      </div>
+    </div>
+    }
+  </div>
+
+  <button
+    mat-flat-button
+    data-testid="add-time-block-button"
+    (click)="addTimeBlock()"
+  >
+    Add Time Block
+  </button>
 </div>

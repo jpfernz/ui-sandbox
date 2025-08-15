@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { ITimeBlock, ITimeBox } from '../models/time-box.interface';
 import {
   CdkDrag,
@@ -9,6 +12,8 @@ import {
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { DatePipe } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { TimeBlockForm } from '../time-block-form/time-block-form';
 
 @Component({
   selector: 'time-box',
@@ -17,12 +22,17 @@ import { DatePipe } from '@angular/common';
   imports: [
     DatePipe,
     MatButtonModule,
+    MatFormFieldModule,
+    MatInputModule,
+    FormsModule,
     CdkDragPlaceholder,
     CdkDropList,
     CdkDrag,
   ],
 })
 export class TimeBox {
+  readonly #dialog = inject(MatDialog);
+
   mockTimeBlocks: ITimeBlock[] = [
     {
       position: 1,
@@ -42,14 +52,43 @@ export class TimeBox {
   ];
 
   mockTimeBox: ITimeBox = {
-    startTime: new Date('2023-01-01T08:00:00'),
+    startTime: new Date('2023-01-01T05:00:00'), // Set to 05:00 to match initial input
     endTime: new Date('2023-01-01T09:00:00'),
     timeBlocks: this.mockTimeBlocks,
   };
 
+  // Input field for start time, initialized to 05:00 GMT
+  startTimeInput = '05:00';
+
   constructor() {
     // Initialize times on component creation
     this.updateTimesAfterReorder();
+  }
+
+  onStartTimeChange(timeValue: string) {
+    // Update the input property
+    this.startTimeInput = timeValue;
+
+    // Parse the time input (HH:mm format) and update the mockTimeBox startTime
+    if (timeValue) {
+      const [hours, minutes] = timeValue.split(':').map(Number);
+      const newStartTime = new Date('2023-01-01T00:00:00');
+      newStartTime.setHours(hours, minutes, 0, 0);
+
+      this.mockTimeBox.startTime = newStartTime;
+      this.updateTimesAfterReorder();
+    }
+  }
+
+  addTimeBlock() {
+    const dialogRef = this.#dialog.open(TimeBlockForm);
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.mockTimeBlocks.push(result);
+        this.updateTimesAfterReorder();
+      }
+    });
   }
 
   drop(event: CdkDragDrop<ITimeBlock[]>) {

@@ -1,0 +1,29 @@
+<mat-dialog-content data-testid="time-block-form">
+  <h3 mat-dialog-title>Add Time Block</h3>
+  <form [formGroup]="timeBlockForm">
+    <mat-form-field appearance="outline">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Duration (minutes)</mat-label>
+      <input matInput formControlName="duration" type="number" min="1" />
+    </mat-form-field>
+
+    <mat-dialog-actions>
+      <button mat-button data-testid="cancel-button" mat-dialog-close>
+        Cancel
+      </button>
+      <button
+        mat-flat-button
+        color="primary"
+        [mat-dialog-close]="timeBlockForm.value"
+        cdkFocusInitial
+        data-testid="add-button"
+      >
+        Add
+      </button>
+    </mat-dialog-actions>
+  </form>
+</mat-dialog-content>

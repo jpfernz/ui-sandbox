@@ -30,23 +30,65 @@ test.describe('Time Box', () => {
   });
 
   test('should display correct initial times based on duration and position', async () => {
-    // First block: starts at 08:00, duration 30m -> ends at 08:30
+    // First block: starts at 05:00, duration 30m -> ends at 05:30
     const morningMeetingTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Morning Meeting'
     );
-    expect(morningMeetingTime).toContain('08:00 - 08:30 (30m)');
+    expect(morningMeetingTime).toContain('05:00 - 05:30 (30m)');
 
-    // Second block: starts at 08:30, duration 45m -> ends at 09:15
+    // Second block: starts at 05:30, duration 45m -> ends at 06:15
     const projectDiscussionTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Project Discussion'
     );
-    expect(projectDiscussionTime).toContain('08:30 - 09:15 (45m)');
+    expect(projectDiscussionTime).toContain('05:30 - 06:15 (45m)');
 
-    // Third block: starts at 09:15, duration 15m -> ends at 09:30
+    // Third block: starts at 06:15, duration 15m -> ends at 06:30
     const clientCallTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Client Call'
     );
-    expect(clientCallTime).toContain('09:15 - 09:30 (15m)');
+    expect(clientCallTime).toContain('06:15 - 06:30 (15m)');
+  });
+
+  test('should display start time input with initial value', async () => {
+    // Verify the start time input is visible and has correct initial value
+    const startTimeInput = timeBoxPage.page.locator(
+      '[data-testid="start-time-input"]'
+    );
+    await expect(startTimeInput).toBeVisible();
+    await expect(startTimeInput).toHaveValue('05:00');
+
+    // Verify the label is present
+    const label = timeBoxPage.page.locator(
+      'mat-label:has-text("Start Time (GMT)")'
+    );
+    await expect(label).toBeVisible();
+  });
+
+  test('should recalculate times when start time changes', async () => {
+    // Update start time to 10:00
+    await timeBoxPage.updateStartTime('10:00');
+
+    // Wait for recalculation and verify new times
+    // First block: starts at 10:00, duration 30m -> ends at 10:30
+    const morningMeetingTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Morning Meeting'
+    );
+    expect(morningMeetingTime).toContain('10:00 - 10:30 (30m)');
+
+    // Second block: starts at 10:30, duration 45m -> ends at 11:15
+    const projectDiscussionTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Project Discussion'
+    );
+    expect(projectDiscussionTime).toContain('10:30 - 11:15 (45m)');
+
+    // Third block: starts at 11:15, duration 15m -> ends at 11:30
+    const clientCallTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Client Call'
+    );
+    expect(clientCallTime).toContain('11:15 - 11:30 (15m)');
+
+    // Verify the input shows the updated value
+    expect(await timeBoxPage.getStartTimeValue()).toBe('10:00');
   });
 
   test('should display draggable time blocks', async () => {
@@ -72,12 +114,12 @@ test.describe('Time Box', () => {
     const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
 
     // Verify the times follow the expected pattern:
-    // Morning Meeting: 08:00 - 08:30 (30m)
-    // Project Discussion: 08:30 - 09:15 (45m)
-    // Client Call: 09:15 - 09:30 (15m)
-    expect(morningTime).toContain('08:00 - 08:30 (30m)');
-    expect(projectTime).toContain('08:30 - 09:15 (45m)');
-    expect(clientTime).toContain('09:15 - 09:30 (15m)');
+    // Morning Meeting: 05:00 - 05:30 (30m)
+    // Project Discussion: 05:30 - 06:15 (45m)
+    // Client Call: 06:15 - 06:30 (15m)
+    expect(morningTime).toContain('05:00 - 05:30 (30m)');
+    expect(projectTime).toContain('05:30 - 06:15 (45m)');
+    expect(clientTime).toContain('06:15 - 06:30 (15m)');
   });
 
   test('should have proper test ids for automation', async () => {
@@ -209,15 +251,15 @@ test.describe('Time Box', () => {
     const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Project Discussion'
     );
-    expect(projectTime).toContain('08:00 - 08:45 (45m)');
+    expect(projectTime).toContain('05:00 - 05:45 (45m)');
 
     const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Morning Meeting'
     );
-    expect(morningTime).toContain('08:45 - 09:15 (30m)');
+    expect(morningTime).toContain('05:45 - 06:15 (30m)');
 
     const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('09:15 - 09:30 (15m)');
+    expect(clientTime).toContain('06:15 - 06:30 (15m)');
 
     // Verify position attributes have been updated
     await expect(
@@ -300,17 +342,17 @@ test.describe('Time Box', () => {
 
     // Verify times have been recalculated
     const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('08:00 - 08:15 (15m)');
+    expect(clientTime).toContain('05:00 - 05:15 (15m)');
 
     const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Morning Meeting'
     );
-    expect(morningTime).toContain('08:15 - 08:45 (30m)');
+    expect(morningTime).toContain('05:15 - 05:45 (30m)');
 
     const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Project Discussion'
     );
-    expect(projectTime).toContain('08:45 - 09:30 (45m)');
+    expect(projectTime).toContain('05:45 - 06:30 (45m)');
 
     // Verify positions in DOM
     await expect(
@@ -402,17 +444,17 @@ test.describe('Time Box', () => {
     ]);
 
     const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('08:00 - 08:15 (15m)');
+    expect(clientTime).toContain('05:00 - 05:15 (15m)');
 
     const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Project Discussion'
     );
-    expect(projectTime).toContain('08:15 - 09:00 (45m)');
+    expect(projectTime).toContain('05:15 - 06:00 (45m)');
 
     const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
       'Morning Meeting'
     );
-    expect(morningTime).toContain('09:00 - 09:30 (30m)');
+    expect(morningTime).toContain('06:00 - 06:30 (30m)');
 
     // Verify final positions
     await expect(

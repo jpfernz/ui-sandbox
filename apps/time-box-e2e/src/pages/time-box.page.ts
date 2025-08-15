@@ -140,4 +140,27 @@ export class TimeBoxPage {
       await this.dragTimeBlockToPosition(description, lastDescription);
     }
   }
+
+  /**
+   * Get the start time input element
+   */
+  getStartTimeInput() {
+    return this.page.locator('[data-testid="start-time-input"]');
+  }
+
+  /**
+   * Update the start time input value
+   */
+  async updateStartTime(newTime: string) {
+    const input = this.getStartTimeInput();
+    await input.fill(newTime);
+    await input.blur(); // Trigger the change event
+  }
+
+  /**
+   * Get the current value of the start time input
+   */
+  async getStartTimeValue() {
+    return await this.getStartTimeInput().inputValue();
+  }
 }
