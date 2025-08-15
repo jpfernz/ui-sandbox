@@ -1,0 +1,45 @@
+{
+  "timeBox": {
+    "startTime": "2023-01-01T05:00:00.000Z",
+    "endTime": "2023-01-01T09:00:00.000Z",
+    "timeBlocks": [
+      {
+        "position": 1,
+        "startTime": "2023-01-01T05:00:00.000Z",
+        "endTime": "2023-01-01T05:15:00.000Z",
+        "duration": 15,
+        "description": "Wake up + Coffee"
+      },
+      {
+        "position": 2,
+        "startTime": "2023-01-01T05:15:00.000Z",
+        "endTime": "2023-01-01T05:45:00.000Z",
+        "duration": 30,
+        "description": "Morning Exercise"
+      },
+      {
+        "position": 3,
+        "startTime": "2023-01-01T05:45:00.000Z",
+        "endTime": "2023-01-01T06:30:00.000Z",
+        "duration": 45,
+        "description": "Shower & Get Ready"
+      },
+      {
+        "position": 4,
+        "startTime": "2023-01-01T06:30:00.000Z",
+        "endTime": "2023-01-01T07:00:00.000Z",
+        "duration": 30,
+        "description": "Breakfast"
+      },
+      {
+        "position": 5,
+        "startTime": "2023-01-01T07:00:00.000Z",
+        "endTime": "2023-01-01T09:00:00.000Z",
+        "duration": 120,
+        "description": "Deep Work Session"
+      }
+    ]
+  },
+  "savedAt": "2025-08-15T12:00:00.000Z",
+  "version": "1.0.0"
+}

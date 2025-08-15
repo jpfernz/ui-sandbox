@@ -63,12 +63,48 @@
     }
   </div>
 
-  <button
-    mat-flat-button
-    data-testid="add-time-block-button"
-    (click)="addTimeBlock()"
-    title="Add Time Block (Press T)"
-  >
-    Add <u>T</u>ime Block
-  </button>
+  <div class="actions-container">
+    <button
+      mat-flat-button
+      data-testid="add-time-block-button"
+      (click)="addTimeBlock()"
+      title="Add Time Block (Press T)"
+    >
+      Add <u>T</u>ime Block
+    </button>
+
+    <div class="data-actions">
+      <button
+        mat-stroked-button
+        color="primary"
+        data-testid="save-data-button"
+        (click)="saveTimeBoxData()"
+        title="Save time box data to JSON file"
+      >
+        <mat-icon>save</mat-icon>
+        Save Data
+      </button>
+
+      <button
+        mat-stroked-button
+        color="accent"
+        data-testid="load-data-button"
+        (click)="loadTimeBoxData()"
+        title="Load time box data from JSON file"
+      >
+        <mat-icon>upload</mat-icon>
+        Load Data
+      </button>
+
+      <button
+        mat-stroked-button
+        data-testid="load-example-button"
+        (click)="loadExampleData()"
+        title="Load example time box data"
+      >
+        <mat-icon>description</mat-icon>
+        Load Example
+      </button>
+    </div>
+  </div>
 </div>

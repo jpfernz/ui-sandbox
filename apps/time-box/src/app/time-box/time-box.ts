@@ -15,6 +15,8 @@ import {
 import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { TimeBlockForm } from '../time-block-form/time-block-form';
+import { DataService } from '../services/data.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'time-box',
@@ -34,6 +36,8 @@ import { TimeBlockForm } from '../time-block-form/time-block-form';
 })
 export class TimeBox {
   readonly #dialog = inject(MatDialog);
+  readonly #dataService = inject(DataService);
+  readonly #snackBar = inject(MatSnackBar);
 
   mockTimeBlocks: ITimeBlock[] = [
     {
@@ -109,6 +113,79 @@ export class TimeBox {
     if (index >= 0 && index < this.mockTimeBlocks.length) {
       this.mockTimeBlocks.splice(index, 1);
       this.updateTimesAfterReorder();
+    }
+  }
+
+  async saveTimeBoxData() {
+    try {
+      await this.#dataService.saveTimeBoxData(this.mockTimeBox);
+      this.#snackBar.open('Time box data saved successfully!', 'Close', {
+        duration: 3000,
+      });
+    } catch {
+      this.#snackBar.open('Failed to save time box data', 'Close', {
+        duration: 3000,
+      });
+    }
+  }
+
+  async loadTimeBoxData() {
+    try {
+      const loadedData = await this.#dataService.loadTimeBoxData();
+      if (loadedData) {
+        this.mockTimeBox = loadedData;
+        this.mockTimeBlocks = loadedData.timeBlocks;
+
+        // Update the start time input to match loaded data
+        const startHours = loadedData.startTime
+          .getHours()
+          .toString()
+          .padStart(2, '0');
+        const startMinutes = loadedData.startTime
+          .getMinutes()
+          .toString()
+          .padStart(2, '0');
+        this.startTimeInput = `${startHours}:${startMinutes}`;
+
+        this.updateTimesAfterReorder();
+        this.#snackBar.open('Time box data loaded successfully!', 'Close', {
+          duration: 3000,
+        });
+      }
+    } catch {
+      this.#snackBar.open('Failed to load time box data', 'Close', {
+        duration: 3000,
+      });
+    }
+  }
+
+  async loadExampleData() {
+    try {
+      const loadedData = await this.#dataService.loadExampleData();
+      if (loadedData) {
+        this.mockTimeBox = loadedData;
+        this.mockTimeBlocks = loadedData.timeBlocks;
+
+        // Update the start time input to match loaded data
+        const startHours = loadedData.startTime
+          .getHours()
+          .toString()
+          .padStart(2, '0');
+        const startMinutes = loadedData.startTime
+          .getMinutes()
+          .toString()
+          .padStart(2, '0');
+        this.startTimeInput = `${startHours}:${startMinutes}`;
+
+        this.updateTimesAfterReorder();
+        this.#snackBar.open('Example data loaded successfully!', 'Close', {
+          duration: 3000,
+        });
+      }
+    } catch {
+      this.#snackBar.open('Failed to load example data', 'Close', {
+        duration: 3000,
+      });
     }
   }
 
