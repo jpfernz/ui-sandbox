@@ -2,13 +2,17 @@
   "name": "@ui-sandbox/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "start:timebox": "nx run time-box:serve:development"
+  },
   "private": true,
   "dependencies": {
+    "@angular/cdk": "^20.1.6",
     "@angular/common": "~20.1.0",
     "@angular/compiler": "~20.1.0",
     "@angular/core": "~20.1.0",
     "@angular/forms": "~20.1.0",
+    "@angular/material": "^20.1.6",
     "@angular/platform-browser": "~20.1.0",
     "@angular/router": "~20.1.0",
     "rxjs": "~7.8.0",

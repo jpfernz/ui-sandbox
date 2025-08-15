@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { NxWelcome } from './nx-welcome';
+import { TimeBox } from './time-box/time-box';
 
 @Component({
-  imports: [NxWelcome, RouterModule],
+  imports: [RouterModule, TimeBox],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
