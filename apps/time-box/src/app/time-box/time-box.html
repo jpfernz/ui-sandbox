@@ -15,20 +15,40 @@
   </div>
 
   <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
-    @for(item of mockTimeBlocks; track item) {
+    @for(item of mockTimeBlocks; track item; let i = $index) {
     <div
       class="example-box"
       cdkDrag
       [attr.data-testid]="'time-block-' + item.position"
     >
       <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
-      <div [attr.data-testid]="'description-' + item.position">
-        {{ item.description }}
-      </div>
-      <div [attr.data-testid]="'time-info-' + item.position">
-        {{ item.startTime ? (item.startTime | date:'HH:mm':'GMT') : '--:--' }} -
-        {{ item.endTime ? (item.endTime | date:'HH:mm':'GMT') : '--:--' }} ({{
-        item.duration }}m)
+      <div class="time-block-content">
+        <div class="time-block-info">
+          <div
+            [attr.data-testid]="'description-' + item.position"
+            class="description"
+          >
+            {{ item.description }}
+          </div>
+          <div
+            [attr.data-testid]="'time-info-' + item.position"
+            class="time-info"
+          >
+            {{ item.startTime ? (item.startTime | date:'HH:mm':'GMT') : '--:--'
+            }} - {{ item.endTime ? (item.endTime | date:'HH:mm':'GMT') : '--:--'
+            }} ({{ item.duration }}m)
+          </div>
+        </div>
+        <button
+          mat-icon-button
+          color="warn"
+          class="delete-button"
+          (click)="deleteTimeBlock(i)"
+          [attr.data-testid]="'delete-button-' + item.position"
+          title="Delete time block"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
       </div>
     </div>
     }

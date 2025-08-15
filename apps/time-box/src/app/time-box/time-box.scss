@@ -55,14 +55,60 @@ h1 {
     background-color: #f5f5f5;
   }
 
+  // Content container for description and time info
+  .time-block-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+  }
+
+  .time-block-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1;
+    gap: 16px;
+  }
+
   // Description styling
+  .description {
+    font-weight: 500;
+    flex: 1;
+  }
+
+  // Time info styling
+  .time-info {
+    color: #666;
+    font-size: 13px;
+    font-family: 'Roboto Mono', monospace;
+    white-space: nowrap;
+  }
+
+  // Delete button styling
+  .delete-button {
+    opacity: 0.3;
+    transition: opacity 200ms ease;
+    flex-shrink: 0;
+
+    &:hover {
+      background-color: rgba(244, 67, 54, 0.1);
+      opacity: 1;
+    }
+  }
+
+  &:hover .delete-button {
+    opacity: 1;
+  }
+
+  // Legacy selectors for backward compatibility
   div[data-testid*='description'] {
     font-weight: 500;
     flex: 1;
     margin-right: 16px;
   }
 
-  // Time info styling
   div[data-testid*='time-info'] {
     color: #666;
     font-size: 13px;

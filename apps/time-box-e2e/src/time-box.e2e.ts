@@ -467,4 +467,86 @@ test.describe('Time Box', () => {
       timeBoxPage.page.locator('[data-testid="time-block-3"]')
     ).toContainText('Morning Meeting');
   });
+
+  test('should display delete buttons for time blocks', async () => {
+    // Check that delete buttons are present for each time block
+    await expect(timeBoxPage.getDeleteButton(1)).toBeAttached();
+    await expect(timeBoxPage.getDeleteButton(2)).toBeAttached();
+    await expect(timeBoxPage.getDeleteButton(3)).toBeAttached();
+  });
+
+  test('should delete time block when delete button is clicked', async () => {
+    // Get initial count
+    const initialCount = await timeBoxPage.getTimeBlockCount();
+    expect(initialCount).toBe(3);
+
+    // Delete the first time block (Morning Meeting)
+    await timeBoxPage.deleteTimeBlock(1);
+
+    // Verify count decreased
+    const newCount = await timeBoxPage.getTimeBlockCount();
+    expect(newCount).toBe(2);
+
+    // Verify Morning Meeting is no longer present
+    const descriptions = await timeBoxPage.getTimeBlockDescriptions();
+    expect(descriptions).not.toContain('Morning Meeting');
+    expect(descriptions).toContain('Project Discussion');
+    expect(descriptions).toContain('Client Call');
+  });
+
+  test('should recalculate times after deletion', async () => {
+    // Delete the first time block (Morning Meeting - 30min)
+    await timeBoxPage.deleteTimeBlock(1);
+
+    // Verify times have been recalculated
+    // Project Discussion should now start at 05:00 (was 05:30)
+    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Project Discussion'
+    );
+    expect(projectTime).toContain('05:00 - 05:45 (45m)');
+
+    // Client Call should now start at 05:45 (was 06:15)
+    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
+    expect(clientTime).toContain('05:45 - 06:00 (15m)');
+  });
+
+  test('should update position numbers after deletion', async () => {
+    // Delete the middle time block (Project Discussion)
+    await timeBoxPage.deleteTimeBlock(2);
+
+    // Verify the remaining blocks have correct positions
+    await expect(
+      timeBoxPage.page.locator('[data-testid="time-block-1"]')
+    ).toContainText('Morning Meeting');
+
+    await expect(
+      timeBoxPage.page.locator('[data-testid="time-block-2"]')
+    ).toContainText('Client Call');
+
+    // Verify time-block-3 no longer exists
+    await expect(
+      timeBoxPage.page.locator('[data-testid="time-block-3"]')
+    ).toHaveCount(0);
+  });
+
+  test('should be able to delete all time blocks', async () => {
+    // Verify we start with 3 blocks
+    const initialCount = await timeBoxPage.getTimeBlockCount();
+    expect(initialCount).toBe(3);
+
+    // Delete first block
+    await timeBoxPage.deleteTimeBlock(1);
+    expect(await timeBoxPage.getTimeBlockCount()).toBe(2);
+
+    // Delete first block again (what was previously second)
+    await timeBoxPage.deleteTimeBlock(1);
+    expect(await timeBoxPage.getTimeBlockCount()).toBe(1);
+
+    // Delete the last block
+    await timeBoxPage.deleteTimeBlock(1);
+    expect(await timeBoxPage.getTimeBlockCount()).toBe(0);
+
+    // Verify the list is empty but still exists
+    await expect(timeBoxPage.page.locator('.example-list')).toBeVisible();
+  });
 });

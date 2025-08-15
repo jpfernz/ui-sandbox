@@ -163,4 +163,34 @@ export class TimeBoxPage {
   async getStartTimeValue() {
     return await this.getStartTimeInput().inputValue();
   }
+
+  /**
+   * Get delete button for a specific time block position
+   */
+  getDeleteButton(position: number) {
+    return this.page.locator(`[data-testid="delete-button-${position}"]`);
+  }
+
+  /**
+   * Delete a time block by position
+   */
+  async deleteTimeBlock(position: number) {
+    const deleteButton = this.getDeleteButton(position);
+    await deleteButton.click();
+  }
+
+  /**
+   * Get the count of time blocks
+   */
+  async getTimeBlockCount() {
+    return await this.timeBlocks.count();
+  }
+
+  /**
+   * Check if a delete button is visible for a specific position
+   */
+  async isDeleteButtonVisible(position: number) {
+    const deleteButton = this.getDeleteButton(position);
+    return await deleteButton.isVisible();
+  }
 }

@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ITimeBlock, ITimeBox } from '../models/time-box.interface';
 import {
@@ -24,6 +25,7 @@ import { TimeBlockForm } from '../time-block-form/time-block-form';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
     FormsModule,
     CdkDragPlaceholder,
     CdkDropList,
@@ -36,18 +38,8 @@ export class TimeBox {
   mockTimeBlocks: ITimeBlock[] = [
     {
       position: 1,
-      duration: 30,
-      description: 'Morning Meeting',
-    },
-    {
-      position: 2,
-      duration: 45,
-      description: 'Project Discussion',
-    },
-    {
-      position: 3,
       duration: 15,
-      description: 'Client Call',
+      description: 'Wake up + Coffee',
     },
   ];
 
@@ -89,6 +81,13 @@ export class TimeBox {
         this.updateTimesAfterReorder();
       }
     });
+  }
+
+  deleteTimeBlock(index: number) {
+    if (index >= 0 && index < this.mockTimeBlocks.length) {
+      this.mockTimeBlocks.splice(index, 1);
+      this.updateTimesAfterReorder();
+    }
   }
 
   drop(event: CdkDragDrop<ITimeBlock[]>) {
