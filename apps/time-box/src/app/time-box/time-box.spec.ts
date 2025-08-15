@@ -107,4 +107,99 @@ describe('TimeBox', () => {
       expect(block.position).toBe(index + 1);
     });
   });
+
+  it('should display underlined T in Add Time Block button', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const button = compiled.querySelector(
+      '[data-testid="add-time-block-button"]'
+    );
+    expect(button?.innerHTML).toContain('Add <u>T</u>ime Block');
+  });
+
+  it('should show tooltip with keyboard shortcut information', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const button = compiled.querySelector(
+      '[data-testid="add-time-block-button"]'
+    );
+    expect(button?.getAttribute('title')).toBe('Add Time Block (Press T)');
+  });
+
+  it('should trigger addTimeBlock when T key is pressed', () => {
+    const addTimeBlockSpy = vi
+      .spyOn(component, 'addTimeBlock')
+      .mockImplementation(() => undefined);
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'T',
+      bubbles: true,
+    });
+
+    window.dispatchEvent(event);
+    expect(addTimeBlockSpy).toHaveBeenCalled();
+  });
+
+  it('should trigger addTimeBlock when t key is pressed', () => {
+    const addTimeBlockSpy = vi
+      .spyOn(component, 'addTimeBlock')
+      .mockImplementation(() => undefined);
+
+    const event = new KeyboardEvent('keydown', {
+      key: 't',
+      bubbles: true,
+    });
+
+    window.dispatchEvent(event);
+    expect(addTimeBlockSpy).toHaveBeenCalled();
+  });
+
+  it('should not trigger addTimeBlock when T key is pressed with modifier keys', () => {
+    const addTimeBlockSpy = vi
+      .spyOn(component, 'addTimeBlock')
+      .mockImplementation(() => undefined);
+
+    // Test with Ctrl+T
+    let event = new KeyboardEvent('keydown', {
+      key: 'T',
+      ctrlKey: true,
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+
+    // Test with Alt+T
+    event = new KeyboardEvent('keydown', {
+      key: 'T',
+      altKey: true,
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+
+    expect(addTimeBlockSpy).not.toHaveBeenCalled();
+  });
+
+  it('should not trigger addTimeBlock when T key is pressed in input field', () => {
+    const addTimeBlockSpy = vi
+      .spyOn(component, 'addTimeBlock')
+      .mockImplementation(() => undefined);
+
+    // Create a mock input element
+    const input = document.createElement('input');
+    document.body.appendChild(input);
+    input.focus();
+
+    const event = new KeyboardEvent('keydown', {
+      key: 'T',
+      bubbles: true,
+    });
+
+    Object.defineProperty(event, 'target', {
+      value: input,
+      enumerable: true,
+    });
+
+    window.dispatchEvent(event);
+    expect(addTimeBlockSpy).not.toHaveBeenCalled();
+
+    // Cleanup
+    document.body.removeChild(input);
+  });
 });

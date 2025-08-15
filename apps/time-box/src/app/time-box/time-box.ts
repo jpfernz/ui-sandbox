@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -87,6 +87,25 @@ export class TimeBox {
     if (index >= 0 && index < this.mockTimeBlocks.length) {
       this.mockTimeBlocks.splice(index, 1);
       this.updateTimesAfterReorder();
+    }
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    // Check if 'T' or 't' key is pressed and no modifier keys are held
+    if (
+      (event.key === 'T' || event.key === 't') &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    ) {
+      // Only trigger if we're not inside an input field
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        event.preventDefault();
+        this.addTimeBlock();
+      }
     }
   }
 

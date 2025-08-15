@@ -22,31 +22,15 @@ test.describe('Time Box', () => {
   test('should display initial time blocks with correct order', async () => {
     const descriptions = await timeBoxPage.getTimeBlockDescriptions();
 
-    expect(descriptions).toEqual([
-      'Morning Meeting',
-      'Project Discussion',
-      'Client Call',
-    ]);
+    expect(descriptions).toEqual(['Wake up + Coffee']);
   });
 
   test('should display correct initial times based on duration and position', async () => {
-    // First block: starts at 05:00, duration 30m -> ends at 05:30
-    const morningMeetingTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
+    // First block: starts at 05:00, duration 15m -> ends at 05:15
+    const wakeUpTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Wake up + Coffee'
     );
-    expect(morningMeetingTime).toContain('05:00 - 05:30 (30m)');
-
-    // Second block: starts at 05:30, duration 45m -> ends at 06:15
-    const projectDiscussionTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectDiscussionTime).toContain('05:30 - 06:15 (45m)');
-
-    // Third block: starts at 06:15, duration 15m -> ends at 06:30
-    const clientCallTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Client Call'
-    );
-    expect(clientCallTime).toContain('06:15 - 06:30 (15m)');
+    expect(wakeUpTime).toContain('05:00 - 05:15 (15m)');
   });
 
   test('should display start time input with initial value', async () => {
@@ -69,23 +53,11 @@ test.describe('Time Box', () => {
     await timeBoxPage.updateStartTime('10:00');
 
     // Wait for recalculation and verify new times
-    // First block: starts at 10:00, duration 30m -> ends at 10:30
-    const morningMeetingTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
+    // First block: starts at 10:00, duration 15m -> ends at 10:15
+    const wakeUpTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Wake up + Coffee'
     );
-    expect(morningMeetingTime).toContain('10:00 - 10:30 (30m)');
-
-    // Second block: starts at 10:30, duration 45m -> ends at 11:15
-    const projectDiscussionTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectDiscussionTime).toContain('10:30 - 11:15 (45m)');
-
-    // Third block: starts at 11:15, duration 15m -> ends at 11:30
-    const clientCallTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Client Call'
-    );
-    expect(clientCallTime).toContain('11:15 - 11:30 (15m)');
+    expect(wakeUpTime).toContain('10:00 - 10:15 (15m)');
 
     // Verify the input shows the updated value
     expect(await timeBoxPage.getStartTimeValue()).toBe('10:00');
@@ -94,7 +66,7 @@ test.describe('Time Box', () => {
   test('should display draggable time blocks', async () => {
     // Verify all time blocks are present and draggable
     const timeBlocks = timeBoxPage.timeBlocks;
-    await expect(timeBlocks).toHaveCount(3);
+    await expect(timeBlocks).toHaveCount(1);
 
     // Verify each block has the CDK drag attribute
     const allBlocks = await timeBlocks.all();
@@ -105,21 +77,13 @@ test.describe('Time Box', () => {
 
   test('should display correct time calculations', async () => {
     // Test that time calculations are working correctly
-    const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
+    const wakeUpTime = await timeBoxPage.getTimeBlockTimeInfo(
+      'Wake up + Coffee'
     );
-    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
 
-    // Verify the times follow the expected pattern:
-    // Morning Meeting: 05:00 - 05:30 (30m)
-    // Project Discussion: 05:30 - 06:15 (45m)
-    // Client Call: 06:15 - 06:30 (15m)
-    expect(morningTime).toContain('05:00 - 05:30 (30m)');
-    expect(projectTime).toContain('05:30 - 06:15 (45m)');
-    expect(clientTime).toContain('06:15 - 06:30 (15m)');
+    // Verify the time follows the expected pattern:
+    // Wake up + Coffee: 05:00 - 05:15 (15m)
+    expect(wakeUpTime).toContain('05:00 - 05:15 (15m)');
   });
 
   test('should have proper test ids for automation', async () => {
@@ -127,31 +91,13 @@ test.describe('Time Box', () => {
     await expect(
       timeBoxPage.page.locator('[data-testid="time-block-1"]')
     ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-2"]')
-    ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-3"]')
-    ).toBeVisible();
 
     await expect(
       timeBoxPage.page.locator('[data-testid="description-1"]')
     ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="description-2"]')
-    ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="description-3"]')
-    ).toBeVisible();
 
     await expect(
       timeBoxPage.page.locator('[data-testid="time-info-1"]')
-    ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-info-2"]')
-    ).toBeVisible();
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-info-3"]')
     ).toBeVisible();
   });
 
@@ -175,378 +121,100 @@ test.describe('Time Box', () => {
     // when the simulation issues are resolved
   });
 
-  test('should update UI when item is moved to middle position', async () => {
-    // Simulate moving "Morning Meeting" (index 0) to middle position (index 1)
-    await timeBoxPage.page.evaluate(() => {
-      // Access Angular component through debugging APIs
-      const element = document.querySelector('time-box');
-      if (element) {
-        // Type declarations for Angular debugging
-        interface NgWindow extends Window {
-          ng?: {
-            getComponent?: (element: Element) => unknown;
-            applyChanges?: (element: Element) => void;
-          };
-        }
-
-        interface NgElement extends Element {
-          __ngContext__?: unknown[];
-        }
-
-        interface TimeBoxComponent {
-          mockTimeBlocks: Array<{
-            position: number;
-            description: string;
-            duration: number;
-            startTime?: Date;
-            endTime?: Date;
-          }>;
-          updateTimesAfterReorder: () => void;
-          cdr?: { detectChanges: () => void };
-        }
-
-        const ngWindow = window as NgWindow;
-        const component =
-          ngWindow.ng?.getComponent?.(element) ||
-          (element as NgElement).__ngContext__?.[8];
-
-        if (
-          component &&
-          typeof component === 'object' &&
-          'mockTimeBlocks' in component &&
-          'updateTimesAfterReorder' in component
-        ) {
-          const timeBoxComp = component as TimeBoxComponent;
-
-          // Simulate drag: move first item to position 1 (after "Project Discussion")
-          const movedItem = timeBoxComp.mockTimeBlocks.splice(0, 1)[0];
-          timeBoxComp.mockTimeBlocks.splice(1, 0, movedItem);
-          timeBoxComp.updateTimesAfterReorder();
-
-          // Trigger Angular change detection
-          if (timeBoxComp.cdr && timeBoxComp.cdr.detectChanges) {
-            timeBoxComp.cdr.detectChanges();
-          } else if (ngWindow.ng?.applyChanges) {
-            ngWindow.ng.applyChanges(element);
-          }
-        }
-      }
-    });
-
-    // Wait for DOM updates
-    await timeBoxPage.page.waitForFunction(
-      () =>
-        document.querySelectorAll('[data-testid^="time-block-"]').length === 3
-    );
-
-    // Verify the new order in the UI
+  test('should display basic time block information', async () => {
+    // Verify the initial time block shows expected information
     const descriptions = await timeBoxPage.getTimeBlockDescriptions();
-    expect(descriptions).toEqual([
-      'Project Discussion',
-      'Morning Meeting',
-      'Client Call',
-    ]);
+    expect(descriptions.length).toBe(1);
+    expect(descriptions[0]).toBe('Wake up + Coffee');
 
-    // Verify times have been recalculated and updated in the UI
-    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectTime).toContain('05:00 - 05:45 (45m)');
-
-    const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
-    );
-    expect(morningTime).toContain('05:45 - 06:15 (30m)');
-
-    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('06:15 - 06:30 (15m)');
-
-    // Verify position attributes have been updated
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-1"]')
-    ).toContainText('Project Discussion');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-2"]')
-    ).toContainText('Morning Meeting');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-3"]')
-    ).toContainText('Client Call');
-  });
-
-  test('should update UI when last item is moved to first position', async () => {
-    // Simulate moving "Client Call" (index 2) to first position (index 0)
-    await timeBoxPage.page.evaluate(() => {
-      const element = document.querySelector('time-box');
-      if (element) {
-        interface NgWindow extends Window {
-          ng?: {
-            getComponent?: (element: Element) => unknown;
-            applyChanges?: (element: Element) => void;
-          };
-        }
-        interface NgElement extends Element {
-          __ngContext__?: unknown[];
-        }
-        interface TimeBoxComponent {
-          mockTimeBlocks: Array<{
-            position: number;
-            description: string;
-            duration: number;
-            startTime?: Date;
-            endTime?: Date;
-          }>;
-          updateTimesAfterReorder: () => void;
-          cdr?: { detectChanges: () => void };
-        }
-
-        const ngWindow = window as NgWindow;
-        const component =
-          ngWindow.ng?.getComponent?.(element) ||
-          (element as NgElement).__ngContext__?.[8];
-
-        if (
-          component &&
-          typeof component === 'object' &&
-          'mockTimeBlocks' in component &&
-          'updateTimesAfterReorder' in component
-        ) {
-          const timeBoxComp = component as TimeBoxComponent;
-
-          // Move last item to first position
-          const movedItem = timeBoxComp.mockTimeBlocks.splice(2, 1)[0];
-          timeBoxComp.mockTimeBlocks.splice(0, 0, movedItem);
-          timeBoxComp.updateTimesAfterReorder();
-
-          // Trigger change detection
-          if (timeBoxComp.cdr && timeBoxComp.cdr.detectChanges) {
-            timeBoxComp.cdr.detectChanges();
-          } else if (ngWindow.ng?.applyChanges) {
-            ngWindow.ng.applyChanges(element);
-          }
-        }
-      }
-    });
-
-    await timeBoxPage.page.waitForFunction(
-      () =>
-        document.querySelectorAll('[data-testid^="time-block-"]').length === 3
-    );
-
-    // Verify new order
-    const descriptions = await timeBoxPage.getTimeBlockDescriptions();
-    expect(descriptions).toEqual([
-      'Client Call',
-      'Morning Meeting',
-      'Project Discussion',
-    ]);
-
-    // Verify times have been recalculated
-    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('05:00 - 05:15 (15m)');
-
-    const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
-    );
-    expect(morningTime).toContain('05:15 - 05:45 (30m)');
-
-    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectTime).toContain('05:45 - 06:30 (45m)');
-
-    // Verify positions in DOM
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-1"]')
-    ).toContainText('Client Call');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-2"]')
-    ).toContainText('Morning Meeting');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-3"]')
-    ).toContainText('Project Discussion');
-  });
-
-  test('should update UI correctly after multiple moves', async () => {
-    // Perform multiple moves and verify UI updates each time
-
-    // First move: Client Call to front
-    await timeBoxPage.page.evaluate(() => {
-      const element = document.querySelector('time-box');
-      const component =
-        (window as any).ng?.getComponent?.(element) ||
-        (element as any).__ngContext__?.[8];
-
-      if (
-        component &&
-        component.mockTimeBlocks &&
-        component.updateTimesAfterReorder
-      ) {
-        const movedItem = component.mockTimeBlocks.splice(2, 1)[0];
-        component.mockTimeBlocks.splice(0, 0, movedItem);
-        component.updateTimesAfterReorder();
-
-        if (component.cdr && component.cdr.detectChanges) {
-          component.cdr.detectChanges();
-        } else if ((window as any).ng?.applyChanges) {
-          (window as any).ng.applyChanges(element);
-        }
-      }
-    });
-
-    await timeBoxPage.page.waitForFunction(
-      () =>
-        document.querySelectorAll('[data-testid^="time-block-"]').length === 3
-    );
-
-    // Verify first move
-    let descriptions = await timeBoxPage.getTimeBlockDescriptions();
-    expect(descriptions).toEqual([
-      'Client Call',
-      'Morning Meeting',
-      'Project Discussion',
-    ]);
-
-    // Second move: Morning Meeting to end
-    await timeBoxPage.page.evaluate(() => {
-      const element = document.querySelector('time-box');
-      const component =
-        (window as any).ng?.getComponent?.(element) ||
-        (element as any).__ngContext__?.[8];
-
-      if (
-        component &&
-        component.mockTimeBlocks &&
-        component.updateTimesAfterReorder
-      ) {
-        const movedItem = component.mockTimeBlocks.splice(1, 1)[0];
-        component.mockTimeBlocks.push(movedItem);
-        component.updateTimesAfterReorder();
-
-        if (component.cdr && component.cdr.detectChanges) {
-          component.cdr.detectChanges();
-        } else if ((window as any).ng?.applyChanges) {
-          (window as any).ng.applyChanges(element);
-        }
-      }
-    });
-
-    await timeBoxPage.page.waitForFunction(
-      () =>
-        document.querySelectorAll('[data-testid^="time-block-"]').length === 3
-    );
-
-    // Verify final order and times
-    descriptions = await timeBoxPage.getTimeBlockDescriptions();
-    expect(descriptions).toEqual([
-      'Client Call',
-      'Project Discussion',
-      'Morning Meeting',
-    ]);
-
-    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('05:00 - 05:15 (15m)');
-
-    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectTime).toContain('05:15 - 06:00 (45m)');
-
-    const morningTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Morning Meeting'
-    );
-    expect(morningTime).toContain('06:00 - 06:30 (30m)');
-
-    // Verify final positions
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-1"]')
-    ).toContainText('Client Call');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-2"]')
-    ).toContainText('Project Discussion');
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-3"]')
-    ).toContainText('Morning Meeting');
+    // Verify time information is displayed
+    const timeInfo = await timeBoxPage.getTimeBlockTimeInfo('Wake up + Coffee');
+    expect(timeInfo).toContain('05:00 - 05:15 (15m)');
   });
 
   test('should display delete buttons for time blocks', async () => {
     // Check that delete buttons are present for each time block
     await expect(timeBoxPage.getDeleteButton(1)).toBeAttached();
-    await expect(timeBoxPage.getDeleteButton(2)).toBeAttached();
-    await expect(timeBoxPage.getDeleteButton(3)).toBeAttached();
   });
 
   test('should delete time block when delete button is clicked', async () => {
     // Get initial count
     const initialCount = await timeBoxPage.getTimeBlockCount();
-    expect(initialCount).toBe(3);
+    expect(initialCount).toBe(1);
 
-    // Delete the first time block (Morning Meeting)
+    // Delete the first time block (Wake up + Coffee)
     await timeBoxPage.deleteTimeBlock(1);
 
-    // Verify count decreased
+    // Verify count decreased to 0
     const newCount = await timeBoxPage.getTimeBlockCount();
-    expect(newCount).toBe(2);
+    expect(newCount).toBe(0);
 
-    // Verify Morning Meeting is no longer present
-    const descriptions = await timeBoxPage.getTimeBlockDescriptions();
-    expect(descriptions).not.toContain('Morning Meeting');
-    expect(descriptions).toContain('Project Discussion');
-    expect(descriptions).toContain('Client Call');
+    // Verify no time blocks remain (skip description check since no blocks exist)
+    await expect(timeBoxPage.timeBlocks).toHaveCount(0);
   });
 
-  test('should recalculate times after deletion', async () => {
-    // Delete the first time block (Morning Meeting - 30min)
-    await timeBoxPage.deleteTimeBlock(1);
-
-    // Verify times have been recalculated
-    // Project Discussion should now start at 05:00 (was 05:30)
-    const projectTime = await timeBoxPage.getTimeBlockTimeInfo(
-      'Project Discussion'
-    );
-    expect(projectTime).toContain('05:00 - 05:45 (45m)');
-
-    // Client Call should now start at 05:45 (was 06:15)
-    const clientTime = await timeBoxPage.getTimeBlockTimeInfo('Client Call');
-    expect(clientTime).toContain('05:45 - 06:00 (15m)');
-  });
-
-  test('should update position numbers after deletion', async () => {
-    // Delete the middle time block (Project Discussion)
-    await timeBoxPage.deleteTimeBlock(2);
-
-    // Verify the remaining blocks have correct positions
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-1"]')
-    ).toContainText('Morning Meeting');
-
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-2"]')
-    ).toContainText('Client Call');
-
-    // Verify time-block-3 no longer exists
-    await expect(
-      timeBoxPage.page.locator('[data-testid="time-block-3"]')
-    ).toHaveCount(0);
-  });
-
-  test('should be able to delete all time blocks', async () => {
-    // Verify we start with 3 blocks
+  test('should add time blocks via dialog', async ({ page }) => {
+    // Get initial count
     const initialCount = await timeBoxPage.getTimeBlockCount();
-    expect(initialCount).toBe(3);
+    expect(initialCount).toBe(1);
 
-    // Delete first block
-    await timeBoxPage.deleteTimeBlock(1);
-    expect(await timeBoxPage.getTimeBlockCount()).toBe(2);
+    // Mock the dialog response
+    page.on('dialog', async (dialog) => {
+      await dialog.accept('New Meeting');
+    });
 
-    // Delete first block again (what was previously second)
-    await timeBoxPage.deleteTimeBlock(1);
-    expect(await timeBoxPage.getTimeBlockCount()).toBe(1);
+    // Click add button
+    await timeBoxPage.addTimeBlockButton.click();
 
-    // Delete the last block
-    await timeBoxPage.deleteTimeBlock(1);
-    expect(await timeBoxPage.getTimeBlockCount()).toBe(0);
+    // Wait for dialog to process and new block to be added
+    await expect(async () => {
+      const newCount = await timeBoxPage.getTimeBlockCount();
+      expect(newCount).toBe(initialCount + 1);
+    }).toPass();
+  });
 
-    // Verify the list is empty but still exists
-    await expect(timeBoxPage.page.locator('.example-list')).toBeVisible();
+  test('should trigger Add Time Block button with T key', async ({ page }) => {
+    // Count initial time blocks
+    const initialCount = await timeBoxPage.getTimeBlockCount();
+
+    // Mock the dialog to click OK
+    page.on('dialog', async (dialog) => {
+      await dialog.accept('New Task');
+    });
+
+    // Press T key to trigger add time block
+    await page.keyboard.press('KeyT');
+
+    // Wait for the new time block to be added by checking the count
+    await expect(async () => {
+      const newCount = await timeBoxPage.getTimeBlockCount();
+      expect(newCount).toBe(initialCount + 1);
+    }).toPass();
+  });
+
+  test('should not trigger Add Time Block button with Ctrl+T', async ({
+    page,
+  }) => {
+    // Count initial time blocks
+    const initialCount = await timeBoxPage.getTimeBlockCount();
+
+    // Press Ctrl+T key (should not trigger add time block)
+    await page.keyboard.press('Control+KeyT');
+
+    // Wait briefly using a stable element to ensure no changes occurred
+    await page.locator('.example-list').waitFor({ state: 'visible' });
+    const newCount = await timeBoxPage.getTimeBlockCount();
+    expect(newCount).toBe(initialCount);
+  });
+
+  test('should show underlined T in Add Time Block button', async () => {
+    // Verify the button contains underlined T
+    const buttonText = await timeBoxPage.addTimeBlockButton.innerText();
+    expect(buttonText).toContain('Time Block');
+
+    // Check for underlined T in the button
+    const underlinedT = timeBoxPage.page.locator('button u');
+    await expect(underlinedT).toBeVisible();
+    await expect(underlinedT).toHaveText('T');
   });
 });

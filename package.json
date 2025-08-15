@@ -4,8 +4,10 @@
   "license": "MIT",
   "scripts": {
     "start:timebox": "nx run time-box:serve:development",
-    "test:timebox-e2e": "nx run time-box-e2e:e2e",
-    "test-ui:timebox-e2e": "nx run time-box-e2e:e2e --ui"
+    "test-e2e:timebox-e2e": "nx run time-box-e2e:e2e",
+    "test:timebox": "nx run time-box:test",
+    "test-ui:timebox-e2e": "nx run time-box-e2e:e2e --ui",
+    "test-all": "nx run-many -t test"
   },
   "private": true,
   "dependencies": {
