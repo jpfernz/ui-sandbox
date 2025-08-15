@@ -83,6 +83,28 @@ export class TimeBox {
     });
   }
 
+  editTimeBlock(index: number) {
+    if (index >= 0 && index < this.mockTimeBlocks.length) {
+      const timeBlockToEdit = this.mockTimeBlocks[index];
+
+      const dialogRef = this.#dialog.open(TimeBlockForm, {
+        data: { timeBlock: timeBlockToEdit },
+      });
+
+      dialogRef.afterClosed().subscribe((result) => {
+        if (result) {
+          // Update the existing time block with new values
+          this.mockTimeBlocks[index] = {
+            ...this.mockTimeBlocks[index],
+            description: result.description,
+            duration: result.duration,
+          };
+          this.updateTimesAfterReorder();
+        }
+      });
+    }
+  }
+
   deleteTimeBlock(index: number) {
     if (index >= 0 && index < this.mockTimeBlocks.length) {
       this.mockTimeBlocks.splice(index, 1);

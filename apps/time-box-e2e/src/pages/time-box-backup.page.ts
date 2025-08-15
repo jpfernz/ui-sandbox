@@ -1,4 +1,4 @@
-import { Locator, Page } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 export class TimeBoxPage {
   readonly page: Page;
@@ -17,22 +17,6 @@ export class TimeBoxPage {
 
   async navigateTo() {
     await this.page.goto('/time-box');
-  }
-
-  async updateStartTime(time: string): Promise<void> {
-    const startTimeInput = this.page.locator(
-      '[data-testid="start-time-input"]'
-    );
-    await startTimeInput.fill(time);
-    // Trigger blur event to ensure change is processed
-    await startTimeInput.blur();
-  }
-
-  async getStartTimeValue(): Promise<string> {
-    const startTimeInput = this.page.locator(
-      '[data-testid="start-time-input"]'
-    );
-    return await startTimeInput.inputValue();
   }
 
   async clickAddTimeBlockButton() {
@@ -100,7 +84,9 @@ export class TimeBoxPage {
   }
 
   async getTimeBlockFormTitle(): Promise<string> {
-    const title = this.page.locator('[data-testid="time-block-form"] h3');
+    const title = this.page.locator(
+      '[data-testid="time-block-form"] h3[mat-dialog-title]'
+    );
     const text = await title.textContent();
     return text?.trim() || '';
   }
@@ -113,40 +99,18 @@ export class TimeBoxPage {
     const descriptionInput = this.page.locator(
       '[data-testid="time-block-form"] input[formControlName="description"]'
     );
-    await descriptionInput.clear();
     await descriptionInput.fill(description);
 
     // Fill duration field
     const durationInput = this.page.locator(
       '[data-testid="time-block-form"] input[formControlName="duration"]'
     );
-    await durationInput.clear();
     await durationInput.fill(duration.toString());
   }
 
   async clickSaveButton(): Promise<void> {
     const saveButton = this.page.locator('[data-testid="save-button"]');
     await saveButton.click();
-  }
-
-  async clickAddButton(): Promise<void> {
-    const addButton = this.page.locator('[data-testid="add-button"]');
-    await addButton.click();
-  }
-
-  async clickFormSubmitButton(): Promise<void> {
-    // Click either save or add button depending on form mode
-    const saveButton = this.page.locator('[data-testid="save-button"]');
-    const addButton = this.page.locator('[data-testid="add-button"]');
-
-    // Check which button is visible and click it
-    if (await saveButton.isVisible()) {
-      await saveButton.click();
-    } else if (await addButton.isVisible()) {
-      await addButton.click();
-    } else {
-      throw new Error('Neither save nor add button is visible');
-    }
   }
 
   async clickCancelButton(): Promise<void> {

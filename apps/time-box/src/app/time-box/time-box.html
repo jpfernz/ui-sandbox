@@ -23,7 +23,16 @@
     >
       <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
       <div class="time-block-content">
-        <div class="time-block-info">
+        <div
+          class="time-block-info"
+          (click)="editTimeBlock(i)"
+          (keydown.enter)="editTimeBlock(i)"
+          (keydown.space)="editTimeBlock(i)"
+          [attr.data-testid]="'time-block-info-' + item.position"
+          tabindex="0"
+          role="button"
+          title="Click to edit"
+        >
           <div
             [attr.data-testid]="'description-' + item.position"
             class="description"

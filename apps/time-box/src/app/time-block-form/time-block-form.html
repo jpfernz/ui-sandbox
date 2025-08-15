@@ -1,5 +1,7 @@
 <mat-dialog-content data-testid="time-block-form">
-  <h3 mat-dialog-title>Add Time Block</h3>
+  <h3 mat-dialog-title>
+    {{ isEditMode ? 'Edit Time Block' : 'Add Time Block' }}
+  </h3>
   <form [formGroup]="timeBlockForm">
     <mat-form-field appearance="outline">
       <mat-label>Description</mat-label>
@@ -20,9 +22,9 @@
         color="primary"
         [mat-dialog-close]="timeBlockForm.value"
         cdkFocusInitial
-        data-testid="add-button"
+        [attr.data-testid]="isEditMode ? 'save-button' : 'add-button'"
       >
-        Add
+        {{ isEditMode ? 'Save' : 'Add' }}
       </button>
     </mat-dialog-actions>
   </form>

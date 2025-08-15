@@ -24,18 +24,29 @@ import { MatInputModule } from '@angular/material/input';
   styleUrl: './time-block-form.scss',
 })
 export class TimeBlockForm implements OnInit {
-  protected readonly dialogRef = inject(MAT_DIALOG_DATA);
+  protected readonly data = inject(MAT_DIALOG_DATA);
   #formBuilder = inject(FormBuilder);
   protected timeBlockForm!: FormGroup;
+  protected isEditMode = false;
 
   ngOnInit() {
     this.#initializeForm();
   }
 
   #initializeForm() {
-    this.timeBlockForm = this.#formBuilder.group({
-      description: [''],
-      duration: [0],
-    });
+    // Check if we're editing an existing time block
+    this.isEditMode = !!this.data?.timeBlock;
+
+    const initialValues = this.isEditMode
+      ? {
+          description: this.data.timeBlock.description || '',
+          duration: this.data.timeBlock.duration || 0,
+        }
+      : {
+          description: '',
+          duration: 0,
+        };
+
+    this.timeBlockForm = this.#formBuilder.group(initialValues);
   }
 }

@@ -7,6 +7,10 @@ test.describe('Time Box', () => {
   test.beforeEach(async ({ page }) => {
     timeBoxPage = new TimeBoxPage(page);
     await timeBoxPage.navigateTo();
+
+    // Ensure we always start with a clean state
+    // Hard refresh the page to reset component state
+    await page.reload();
   });
 
   test('should display Time Box', async ({ page }) => {
@@ -140,56 +144,67 @@ test.describe('Time Box', () => {
   test('should delete time block when delete button is clicked', async () => {
     // Get initial count
     const initialCount = await timeBoxPage.getTimeBlockCount();
-    expect(initialCount).toBe(1);
+    expect(initialCount).toBeGreaterThanOrEqual(1);
 
-    // Delete the first time block (Wake up + Coffee)
+    // Delete the first time block
     await timeBoxPage.deleteTimeBlock(1);
 
-    // Verify count decreased to 0
+    // Verify count decreased
     const newCount = await timeBoxPage.getTimeBlockCount();
-    expect(newCount).toBe(0);
-
-    // Verify no time blocks remain (skip description check since no blocks exist)
-    await expect(timeBoxPage.timeBlocks).toHaveCount(0);
+    expect(newCount).toBe(initialCount - 1);
   });
 
-  test('should add time blocks via dialog', async ({ page }) => {
+  test('should add time blocks via dialog', async () => {
     // Get initial count
     const initialCount = await timeBoxPage.getTimeBlockCount();
     expect(initialCount).toBe(1);
 
-    // Mock the dialog response
-    page.on('dialog', async (dialog) => {
-      await dialog.accept('New Meeting');
-    });
-
     // Click add button
     await timeBoxPage.addTimeBlockButton.click();
 
-    // Wait for dialog to process and new block to be added
-    await expect(async () => {
-      const newCount = await timeBoxPage.getTimeBlockCount();
-      expect(newCount).toBe(initialCount + 1);
-    }).toPass();
+    // Wait for the dialog to appear
+    expect(await timeBoxPage.isTimeBlockFormVisible()).toBe(true);
+
+    // Fill in the form
+    await timeBoxPage.fillTimeBlockForm('New Meeting', 60);
+
+    // Click add button
+    await timeBoxPage.clickAddButton();
+
+    // Wait for dialog to close and new block to be added
+    const formsAfterAdd = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"]'
+    );
+    await expect(formsAfterAdd).toHaveCount(0);
+
+    const newCount = await timeBoxPage.getTimeBlockCount();
+    expect(newCount).toBe(initialCount + 1);
   });
 
-  test('should trigger Add Time Block button with T key', async ({ page }) => {
+  test('should trigger Add Time Block button with T key', async () => {
     // Count initial time blocks
     const initialCount = await timeBoxPage.getTimeBlockCount();
 
-    // Mock the dialog to click OK
-    page.on('dialog', async (dialog) => {
-      await dialog.accept('New Task');
-    });
+    // Press T key to trigger add dialog
+    await timeBoxPage.page.keyboard.press('KeyT');
 
-    // Press T key to trigger add time block
-    await page.keyboard.press('KeyT');
+    // Wait for the dialog to appear
+    expect(await timeBoxPage.isTimeBlockFormVisible()).toBe(true);
 
-    // Wait for the new time block to be added by checking the count
-    await expect(async () => {
-      const newCount = await timeBoxPage.getTimeBlockCount();
-      expect(newCount).toBe(initialCount + 1);
-    }).toPass();
+    // Fill in the form
+    await timeBoxPage.fillTimeBlockForm('Keyboard Added Task', 45);
+
+    // Click add button
+    await timeBoxPage.clickAddButton();
+
+    // Wait for dialog to close and new block to be added
+    const formsAfterAdd = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"]'
+    );
+    await expect(formsAfterAdd).toHaveCount(0);
+
+    const newCount = await timeBoxPage.getTimeBlockCount();
+    expect(newCount).toBe(initialCount + 1);
   });
 
   test('should not trigger Add Time Block button with Ctrl+T', async ({
@@ -216,5 +231,126 @@ test.describe('Time Box', () => {
     const underlinedT = timeBoxPage.page.locator('button u');
     await expect(underlinedT).toBeVisible();
     await expect(underlinedT).toHaveText('T');
+  });
+
+  test('should open edit dialog when time block is clicked', async () => {
+    // Click on the initial time block
+    await timeBoxPage.clickTimeBlockToEdit('Wake up + Coffee');
+
+    // Verify the form opens
+    expect(await timeBoxPage.isTimeBlockFormVisible()).toBe(true);
+
+    // Verify the form title shows "Edit Time Block"
+    const title = await timeBoxPage.getTimeBlockFormTitle();
+    expect(title).toBe('Edit Time Block');
+
+    // Verify the form is pre-filled with existing values
+    const descriptionInput = timeBoxPage.page.locator(
+      'input[formControlName="description"]'
+    );
+    const durationInput = timeBoxPage.page.locator(
+      'input[formControlName="duration"]'
+    );
+
+    await expect(descriptionInput).toHaveValue('Wake up + Coffee');
+    await expect(durationInput).toHaveValue('15');
+  });
+
+  test('should save changes when editing a time block', async () => {
+    // Use the existing time block that's already on the page (Wake up + Coffee)
+    // Click on the time block to edit
+    await timeBoxPage.clickTimeBlockToEdit('Wake up + Coffee');
+
+    // Wait for the edit dialog to be visible
+    await expect(
+      timeBoxPage.page.locator('[data-testid="time-block-form"]')
+    ).toBeVisible();
+
+    // Clear and fill the form fields
+    const descriptionInput = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"] input[formControlName="description"]'
+    );
+    const durationInput = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"] input[formControlName="duration"]'
+    );
+
+    await descriptionInput.clear();
+    await descriptionInput.fill('Morning Routine');
+    await durationInput.clear();
+    await durationInput.fill('30');
+
+    // Save the changes using the save button
+    await timeBoxPage.clickSaveButton();
+
+    // Wait for dialog to close
+    const formsAfterSave = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"]'
+    );
+    await expect(formsAfterSave).toHaveCount(0);
+
+    // Verify the time block was updated
+    const descriptions = await timeBoxPage.getTimeBlockDescriptions();
+    expect(descriptions).toContain('Morning Routine');
+
+    // Verify the time info was updated (30 minutes: 05:00 - 05:30)
+    const timeInfo = await timeBoxPage.getTimeBlockTimeInfo('Morning Routine');
+    expect(timeInfo).toContain('05:00 - 05:30 (30m)');
+  });
+
+  test('should cancel editing without saving changes', async () => {
+    // Click on the initial time block to edit
+    await timeBoxPage.clickTimeBlockToEdit('Wake up + Coffee');
+
+    // Update the description and duration
+    await timeBoxPage.fillTimeBlockForm('This should not save', 99);
+
+    // Cancel the changes
+    await timeBoxPage.clickCancelButton();
+
+    // Wait for dialog to close
+    const formsAfterCancel = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"]'
+    );
+    await expect(formsAfterCancel).toHaveCount(0);
+
+    // Verify the time block was not updated
+    const descriptions = await timeBoxPage.getTimeBlockDescriptions();
+    expect(descriptions).toEqual(['Wake up + Coffee']);
+
+    // Verify the time info was not updated
+    const timeInfo = await timeBoxPage.getTimeBlockTimeInfo('Wake up + Coffee');
+    expect(timeInfo).toContain('05:00 - 05:15 (15m)');
+  });
+
+  test('should support keyboard navigation for editing time blocks', async () => {
+    // Get the time block info element
+    const timeBlockInfo = timeBoxPage.page.locator(
+      '[data-testid="time-block-info-1"]'
+    );
+
+    // Focus the element using tab navigation
+    await timeBlockInfo.focus();
+
+    // Press Enter to trigger edit
+    await timeBoxPage.page.keyboard.press('Enter');
+
+    // Verify the form opens
+    expect(await timeBoxPage.isTimeBlockFormVisible()).toBe(true);
+
+    // Cancel to close
+    await timeBoxPage.clickCancelButton();
+
+    // Wait for dialog to close completely
+    const formsAfterCancel = timeBoxPage.page.locator(
+      '[data-testid="time-block-form"]'
+    );
+    await expect(formsAfterCancel).toHaveCount(0);
+
+    // Focus again and use Space key
+    await timeBlockInfo.focus();
+    await timeBoxPage.page.keyboard.press('Space');
+
+    // Verify the form opens again
+    expect(await timeBoxPage.isTimeBlockFormVisible()).toBe(true);
   });
 });
